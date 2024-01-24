@@ -1,3 +1,4 @@
+
 import psycopg2
 import csv
 from datetime import datetime
@@ -15,7 +16,7 @@ from tkinter import filedialog
 
 selected_directory = ""
 history_date =  ''
-current_date = ''
+current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 '''
 Получаем данные в файл csv
 Данные получаем с учетом, того что время начала бепрется из файла history.txt
@@ -49,13 +50,13 @@ def SaveDataFile():
     try:
     # Установите соединение с базой данных
         connection = psycopg2.connect(
-            user="IntegrationUser",
-            password="cie5upai4piev9Va",
+            user="postgres",
+            password="123",
             host="localhost",
             port="5432",
             database="MMPC_9x5_AGMK"
         )
-        # print("Connect Success")
+        print("Connect to DB Success")
         
    
         # Создайте курсор
@@ -82,34 +83,27 @@ def SaveDataFile():
         """
         
         cursor.execute(postgreSQL_select_Query)
-        print("Selecting rows from mobile table using cursor.fetchall")
-        current_date2 = current_date.replace(":", "-")
+        print("Формирование файла, чтение данных")
+        file_date = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         records = cursor.fetchall()
         if not records:
-            with open(os.path.join(selected_directory, '{}.csv'.format(current_date2)), 'w') as f:
+            with open(os.path.join(selected_directory, '{}.csv'.format(file_date)), 'w') as f:
                 writer = csv.writer(f)
                 writer.writerow(['FixTime', 'idDataBlock', 'TagNum', 'Value', 'Name', 'Description'])
                 for row in records:
                     writer.writerow(0, 0, 0, 0, 0, 0)
             print("Данные из базы не получены либо новых данных нет")
                     
-        for row in records:
-            '''
-            print("FixTime = ", row[0], )
-            print("idDataBlock = ", row[1])
-            print("TagNum = ", row[2], )
-            print("Value = ", row[3])
-            
-            '''
-            
-            if records:
-                current_date2 = current_date.replace(":", "-")
-                with open(os.path.join(selected_directory, '{}.csv'.format(current_date2)), 'w') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(['FixTime', 'idDataBlock', 'TagNum', 'Value', 'Name', 'Description'])
-                    for row in records:
-                        writer.writerow([row[0], row[1], row[2], row[3], row[4], row[5]])
-                            
+        if records:
+            current_date2 = current_date.replace(":", "-")
+            with open(os.path.join(selected_directory, '{}.csv'.format(file_date)), 'w') as f:
+                writer = csv.writer(f)
+                writer.writerow(['FixTime', 'idDataBlock', 'TagNum', 'Value', 'Name', 'Description'])
+                for row in records:
+                    writer.writerow([row[0], row[1], row[2], row[3], row[4], row[5]])
+            print("Данные записаны в файл")     
+        else:
+            print("Нет новых записей")     
         # Пишем в файл дату обращения функция def wrightFileDate()
         wrightFileDate()
             
@@ -129,6 +123,7 @@ def SaveDataFile():
     # Update the "Last Run Time" label
     last_run_time.set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
+    # Schedule the function to be called again after the period specified in the input field
     root.after(int(period.get())*1000, SaveDataFile)
 
 
@@ -147,8 +142,7 @@ def wrightFileDate():
 
 def start_automatically():
     # Schedule the SaveDataFile function to be called immediately, then every period seconds
-    # Schedule the function to be called again after the period specified in the input field
-    SaveDataFile()
+    root.after(0, SaveDataFile)
     print("work start_automatically")
 
 def browse_directory():
