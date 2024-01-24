@@ -29,7 +29,8 @@ def SaveDataFile():
     current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     if selected_directory =='':
-        selected_directory = "C:\\Users\\I.Perekalskiy\\Sync\\"
+        #selected_directory = "C:\\Users\\I.Perekalskiy\\Sync\\"
+        selected_directory = "C:\\Users\\user\\YandexDisk\\"
         
     
 
